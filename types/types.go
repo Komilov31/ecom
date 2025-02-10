@@ -2,8 +2,6 @@ package types
 
 import (
 	"time"
-
-	"github.com/Komilov31/ecom/utils"
 )
 
 type UserStore interface {
@@ -15,6 +13,30 @@ type UserStore interface {
 type ProductStore interface {
 	GetProducts() ([]Product, error)
 	CreateProduct(Product) error
+	GetProductsByID(ps []int) ([]Product, error)
+}
+
+type OrderStore interface {
+	CreateOrder(Order) (int, error)
+	CreateOrderItem(OrderItem) error
+}
+
+type Order struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"userId"`
+	Total     float64   `json:"total"`
+	Status    string    `json:"status"`
+	Address   string    `json:"address"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type OrderItem struct {
+	ID        int       `json:"id"`
+	OrderId   int       `json:"orderId"`
+	ProductId int       `json:"productId"`
+	Quantity  int       `json:"quantity"`
+	Price     float64   `json:"price"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Product struct {
@@ -28,12 +50,12 @@ type Product struct {
 }
 
 type User struct {
-	ID        int            `json:"id"`
-	FirstName string         `json:"firstName"`
-	LastName  string         `json:"lastName"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password"`
-	CreatedAt utils.JSONTime `json:"createdAt"`
+	ID        int       `json:"id"`
+	FirstName string    `json:"firstName"`
+	LastName  string    `json:"lastName"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type RegisterUserPayload struct {
@@ -46,4 +68,13 @@ type RegisterUserPayload struct {
 type LoginUserPayload struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+}
+
+type CartItem struct {
+	ProductID int `json:"productID"`
+	Quantity  int `json:"quantity"`
+}
+
+type CartCheckoutPayload struct {
+	Items []CartItem `json:"items" validate:"required"`
 }

@@ -1,7 +1,6 @@
 package product
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/Komilov31/ecom/types"
@@ -36,7 +35,6 @@ func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
 	product := types.Product{}
 
 	err := utils.ParseJson(r, &product)
-	log.Println(product.CreatedAt)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

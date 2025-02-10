@@ -2,6 +2,7 @@ package product
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Komilov31/ecom/types"
 )
@@ -33,8 +34,8 @@ func (s *Store) GetProducts() ([]types.Product, error) {
 }
 
 func (s *Store) CreateProduct(product types.Product) error {
-	_, err := s.db.Exec(`INSERT INTO products (name, description, image, price, quantity, created_at)
-	VALUES ($1, $2, $3, $4, $5, $6)`, product.Name, product.Description, product.Image, product.Price, product.Quantity, product.CreatedAt)
+	_, err := s.db.Exec(`INSERT INTO products (name, description, image, price, quantity)
+	VALUES ($1, $2, $3, $4, $5)`, product.Name, product.Description, product.Image, product.Price, product.Quantity)
 	if err != nil {
 		return err
 	}
@@ -42,11 +43,42 @@ func (s *Store) CreateProduct(product types.Product) error {
 	return nil
 }
 
+func (s *Store) GetProductsByID(productIDs []int) ([]types.Product, error) {
+	placeholders := "$1, "
+	for id := 2; id < len(productIDs); id++ {
+		placeholders += fmt.Sprintf("$%d, ", id)
+	}
+	placeholders += fmt.Sprintf("$%d", len(productIDs))
+	query := fmt.Sprintf("SELECT * FROM products WHERE id IN (%s)", placeholders)
+
+	args := make([]interface{}, len(placeholders))
+	for i, v := range productIDs {
+		args[i] = v
+	}
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	products := []types.Product{}
+	for rows.Next() {
+		p, err := scanRowsIntoProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, *p)
+	}
+
+	return products, nil
+}
+
 func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
 	product := new(types.Product)
 
 	err := rows.Scan(
-		// &product.ID,
+		&product.ID,
 		&product.Name,
 		&product.Description,
 		&product.Image,
