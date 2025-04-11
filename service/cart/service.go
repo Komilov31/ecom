@@ -29,7 +29,12 @@ func (h *Handler) CreateOrder(ps []types.Product, items []types.CartItem, userID
 		return 0, 0, nil
 	}
 
-	totalPrice := calculateTotalPrice(items, productMap)
+	// totalPrice := calculateTotalPrice(items, productMap)
+
+	for _, item := range items {
+		product := productMap[item.ProductID]
+		product.Quantity -= item.Quantity
+	}
 
 	return 0, 0, nil
 }
